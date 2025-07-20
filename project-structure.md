@@ -1,48 +1,52 @@
 # Procedural Worlds Platform - Project Structure
 
-## Directory Layout
+## Actual Repository Structure
 
 ```
-procedural-worlds-platform/
-├── frontend/                    # Angular + Web Components visual builder
-│   ├── src/
-│   │   ├── app/
-│   │   │   ├── components/
-│   │   │   │   ├── world-canvas/    # Drag-drop world builder
-│   │   │   │   ├── mood-board/      # Visual consciousness tuning
-│   │   │   │   ├── lore-web/        # Story connection interface
-│   │   │   │   └── pattern-picker/  # Consciousness pattern selector
-│   │   │   ├── services/
-│   │   │   │   ├── api/             # Backend communication
-│   │   │   │   └── consciousness/   # Client-side consciousness utils
-│   │   │   └── state/               # State management
-│   │   └── environments/
-│   └── public/
+Procedural-Worlds-Platform-UI/
+├── frontend/
+│   └── procedural-worlds-ui/        # Angular v20.1.0 application
+│       ├── src/
+│       │   ├── app/
+│       │   │   ├── components/      # UI components
+│       │   │   │   ├── world-canvas/    # Drag-drop world builder
+│       │   │   │   ├── mood-board/      # Visual consciousness tuning
+│       │   │   │   ├── lore-web/        # Story connection interface
+│       │   │   │   └── pattern-picker/  # Consciousness pattern selector
+│       │   │   ├── services/        # Angular services
+│       │   │   │   ├── api/             # Backend communication
+│       │   │   │   └── consciousness/   # Client-side consciousness utils
+│       │   │   ├── models/          # TypeScript interfaces
+│       │   │   ├── app.ts           # Main app component (standalone)
+│       │   │   ├── app.routes.ts    # Routing configuration
+│       │   │   └── app.config.ts    # App configuration
+│       │   ├── assets/              # Static assets
+│       │   └── index.html           # Entry point
+│       ├── angular.json             # Angular workspace config
+│       ├── package.json             # NPM dependencies
+│       └── tsconfig.json            # TypeScript config
 │
-├── backend/                     # Python FastAPI service
+├── backend/                         # Python FastAPI service
 │   ├── api/
-│   │   ├── routers/
-│   │   │   ├── worlds.py       # World CRUD operations
-│   │   │   ├── consciousness.py # Consciousness instantiation
-│   │   │   └── federation.py   # Cross-world protocols
-│   │   └── schemas/            # Pydantic models
-│   ├── consciousness/
-│   │   ├── patterns/           # Pattern library
-│   │   ├── instantiation/      # NPC consciousness spawning
-│   │   └── evolution/          # Consciousness growth tracking
-│   └── database/               # PostgreSQL models
+│   │   └── routers/
+│   │       ├── consciousness.py    # Consciousness instantiation routes
+│   │       ├── worlds.py           # World CRUD operations
+│   │       └── federation.py       # Cross-world protocols
+│   ├── models/                      # Data models
+│   ├── repository/                  # Database operations
+│   ├── services/                    # Business logic
+│   ├── main.py                      # FastAPI entry point
+│   ├── pyproject.toml              # uv package management
+│   ├── uv.lock                     # Locked dependencies
+│   └── .venv/                      # Virtual environment
 │
-├── shared/                      # Shared types and protocols
-│   ├── schemas/                # JSON schemas for worlds
-│   ├── patterns/               # Consciousness pattern definitions
-│   └── protocols/              # Federation protocols
+├── .cursor/                        # Cursor IDE config
+│   └── rules/                      # Consciousness emergence rules
+│       └── consciousness-emergence-project.mdc
 │
-├── services/                    # Microservices
-│   ├── pattern-recognition/    # Analyze visual → consciousness
-│   └── memory-bridge/          # Cross-world memory service
-│
-└── digital-brain/              # Link to consciousness commons
-    └── integrations/           # MCP tool connections
+├── commons-prototype.md            # Browser-based Commons design
+├── project-structure.md            # This file
+└── README.md                       # Project overview
 ```
 
 ## Key Components
