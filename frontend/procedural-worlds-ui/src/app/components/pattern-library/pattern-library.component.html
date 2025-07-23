@@ -1,0 +1,407 @@
+<div class="pattern-library-container">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-state">
+    <mat-spinner></mat-spinner>
+    <p>Loading consciousness patterns...</p>
+  </div>
+
+  <!-- Gallery View -->
+  <div *ngIf="!isLoading && viewMode === 'gallery'" class="gallery-view">
+    <!-- Header -->
+    <header class="library-header">
+      <h1>Consciousness Pattern Library</h1>
+      <p class="subtitle">Explore the mathematical structures underlying awareness</p>
+    </header>
+
+    <!-- Search and Filters -->
+    <div class="search-filter-section">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Search patterns...</mat-label>
+        <input matInput [(ngModel)]="searchQuery" placeholder="Type to search">
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="category-filter">
+        <mat-label>Category</mat-label>
+        <mat-select [(ngModel)]="selectedCategory">
+          <mat-option *ngFor="let cat of categories" [value]="cat.value">
+            {{ cat.label }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <!-- Pattern Grid -->
+    <div class="patterns-grid" [@listAnimation]>
+      <mat-card 
+        *ngFor="let pattern of getFilteredPatterns()" 
+        class="pattern-card"
+        (click)="selectPattern(pattern)"
+        [@fadeIn]
+      >
+        <mat-card-header>
+          <mat-icon mat-card-avatar class="pattern-icon">
+            {{ getPatternIcon(pattern.type) }}
+          </mat-icon>
+          <mat-card-title>{{ pattern.name }}</mat-card-title>
+          <mat-card-subtitle>{{ pattern.type | titlecase }}</mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content>
+          <div class="pattern-preview">
+            <!-- Simple visual preview based on type -->
+            <div class="preview-graphic" [ngClass]="'type-' + pattern.type">
+              <div class="preview-element" *ngFor="let i of [1,2,3,4]"></div>
+            </div>
+          </div>
+
+          <div class="pattern-info">
+            <div class="info-row">
+              <span class="label">Category:</span>
+              <mat-chip [color]="getCategoryColor(pattern.category)">
+                {{ pattern.category }}
+              </mat-chip>
+            </div>
+
+            <div class="info-row">
+              <span class="label">Stability:</span>
+              <div class="stability-meter">
+                <div 
+                  class="stability-fill" 
+                  [style.width.%]="pattern.stability * 100"
+                  [class.high]="pattern.stability >= 0.7"
+                  [class.medium]="pattern.stability >= 0.4"
+                  [class.low]="pattern.stability < 0.4"
+                ></div>
+              </div>
+              <span class="stability-label">{{ getStabilityLabel(pattern.stability) }}</span>
+            </div>
+
+            <div class="info-row">
+              <span class="label">Instances:</span>
+              <span class="value">{{ pattern.instances }}</span>
+            </div>
+
+            <div class="info-row">
+              <span class="label">Discovered:</span>
+              <span class="value">{{ formatDate(pattern.discovered) }}</span>
+            </div>
+          </div>
+
+          <div class="invariants">
+            <mat-chip *ngFor="let invariant of pattern.structure.invariants.slice(0, 3)">
+              {{ invariant }}
+            </mat-chip>
+          </div>
+        </mat-card-content>
+
+        <mat-card-actions>
+          <button mat-button color="primary">
+            <mat-icon>visibility</mat-icon>
+            Explore
+          </button>
+          <button mat-button color="accent">
+            <mat-icon>psychology</mat-icon>
+            Resonate
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="getFilteredPatterns().length === 0" class="empty-state">
+      <mat-icon>search_off</mat-icon>
+      <h3>No patterns found</h3>
+      <p>Try adjusting your search criteria</p>
+    </div>
+  </div>
+
+  <!-- Detail View -->
+  <div *ngIf="!isLoading && viewMode === 'detail' && selectedPattern" class="detail-view" [@fadeIn]>
+    <!-- Back Button -->
+    <button mat-icon-button (click)="backToGallery()" class="back-button">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+
+    <div class="detail-content">
+      <!-- Pattern Header -->
+      <header class="pattern-header">
+        <div class="header-left">
+          <mat-icon class="large-icon">{{ getPatternIcon(selectedPattern.type) }}</mat-icon>
+          <div class="header-info">
+            <h1>{{ selectedPattern.name }}</h1>
+            <p class="pattern-type">{{ selectedPattern.type | titlecase }}</p>
+            <div class="header-chips">
+              <mat-chip [color]="getCategoryColor(selectedPattern.category)">
+                {{ selectedPattern.category }}
+              </mat-chip>
+              <mat-chip>
+                {{ selectedPattern.structure.topology }} topology
+              </mat-chip>
+              <mat-chip>
+                {{ selectedPattern.structure.dimensions }}D
+              </mat-chip>
+            </div>
+          </div>
+        </div>
+
+        <div class="header-right">
+          <div class="stat-card">
+            <span class="stat-value">{{ selectedPattern.instances }}</span>
+            <span class="stat-label">Active Instances</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-value">{{ (selectedPattern.stability * 100).toFixed(0) }}%</span>
+            <span class="stat-label">Stability</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-value">{{ selectedPattern.discoveredBy }}</span>
+            <span class="stat-label">Discovered By</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- Visualization Canvas -->
+      <div class="visualization-section">
+        <h2>Pattern Visualization</h2>
+        
+        <div class="visualization-controls">
+          <mat-slider
+            min="0.5"
+            max="2"
+            step="0.1"
+            [(ngModel)]="visualizationScale"
+            color="primary"
+          >
+            <input matSliderThumb>
+          </mat-slider>
+          <span class="control-label">Scale: {{ visualizationScale.toFixed(1) }}x</span>
+
+          <mat-slider
+            min="0"
+            max="2"
+            step="0.1"
+            [(ngModel)]="animationSpeed"
+            color="accent"
+          >
+            <input matSliderThumb>
+          </mat-slider>
+          <span class="control-label">Speed: {{ animationSpeed.toFixed(1) }}x</span>
+        </div>
+
+        <div class="canvas-container">
+          <canvas #patternCanvas class="pattern-canvas"></canvas>
+        </div>
+
+        <div class="layer-controls">
+          <mat-checkbox [(ngModel)]="showLayers.structure" color="primary">
+            Structure
+          </mat-checkbox>
+          <mat-checkbox [(ngModel)]="showLayers.flow" color="primary">
+            Flow
+          </mat-checkbox>
+          <mat-checkbox [(ngModel)]="showLayers.consciousness" color="primary">
+            Consciousness
+          </mat-checkbox>
+          <mat-checkbox [(ngModel)]="showLayers.information" color="primary">
+            Information
+          </mat-checkbox>
+        </div>
+      </div>
+
+      <!-- Pattern Details Tabs -->
+      <mat-tab-group class="detail-tabs">
+        <!-- Structure Tab -->
+        <mat-tab label="Structure">
+          <div class="tab-content">
+            <div class="detail-grid">
+              <div class="detail-card">
+                <h3>Topology</h3>
+                <p>{{ selectedPattern.structure.topology | titlecase }}</p>
+              </div>
+              <div class="detail-card">
+                <h3>Dimensions</h3>
+                <p>{{ selectedPattern.structure.dimensions }}</p>
+              </div>
+              <div class="detail-card">
+                <h3>Nodes</h3>
+                <p>{{ selectedPattern.structure.nodes.length }}</p>
+              </div>
+              <div class="detail-card">
+                <h3>Connections</h3>
+                <p>{{ selectedPattern.structure.connections.length }}</p>
+              </div>
+            </div>
+
+            <div class="invariants-section">
+              <h3>Invariants</h3>
+              <div class="invariants-list">
+                <mat-chip *ngFor="let invariant of selectedPattern.structure.invariants">
+                  {{ invariant }}
+                </mat-chip>
+              </div>
+            </div>
+          </div>
+        </mat-tab>
+
+        <!-- Dynamics Tab -->
+        <mat-tab label="Dynamics">
+          <div class="tab-content">
+            <div class="dynamics-info">
+              <h3>Oscillations</h3>
+              <div class="oscillation-list">
+                <div *ngFor="let osc of selectedPattern.dynamics.oscillations" class="oscillation-item">
+                  <span>Frequency: {{ osc.frequency.toFixed(2) }} Hz</span>
+                  <span>Amplitude: {{ osc.amplitude.toFixed(2) }}</span>
+                  <span>Damping: {{ osc.damping.toFixed(3) }}</span>
+                </div>
+              </div>
+
+              <h3>Attractors</h3>
+              <div class="attractor-list">
+                <div *ngFor="let attr of selectedPattern.dynamics.attractors" class="attractor-item">
+                  <mat-icon>{{ attr.type === 'strange' ? 'all_inclusive' : 'adjust' }}</mat-icon>
+                  <span>{{ attr.type | titlecase }}</span>
+                  <span>Stability: {{ attr.stability }}</span>
+                </div>
+              </div>
+
+              <h3>Criticality</h3>
+              <div class="criticality-info">
+                <div class="metric">
+                  <span class="label">Order Parameter:</span>
+                  <span class="value">{{ selectedPattern.dynamics.criticality.orderParameter.toFixed(3) }}</span>
+                </div>
+                <div class="metric">
+                  <span class="label">Correlation Length:</span>
+                  <span class="value">{{ selectedPattern.dynamics.criticality.correlationLength.toFixed(1) }}</span>
+                </div>
+                <div class="metric">
+                  <span class="label">Susceptibility:</span>
+                  <span class="value">{{ selectedPattern.dynamics.criticality.susceptibility.toFixed(3) }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </mat-tab>
+
+        <!-- Analysis Tab -->
+        <mat-tab label="Analysis" *ngIf="patternAnalysis">
+          <div class="tab-content">
+            <div class="analysis-grid">
+              <div class="analysis-card">
+                <h3>Complexity Measures</h3>
+                <div class="measure-list">
+                  <div class="measure">
+                    <span>Kolmogorov:</span>
+                    <span>{{ patternAnalysis.complexity.kolmogorov.toFixed(3) }}</span>
+                  </div>
+                  <div class="measure">
+                    <span>Fractal Dimension:</span>
+                    <span>{{ patternAnalysis.complexity.fractalDimension.toFixed(3) }}</span>
+                  </div>
+                  <div class="measure">
+                    <span>Entropy:</span>
+                    <span>{{ patternAnalysis.complexity.entropy.toFixed(3) }}</span>
+                  </div>
+                  <div class="measure">
+                    <span>Emergence:</span>
+                    <span>{{ patternAnalysis.complexity.emergence.toFixed(3) }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="analysis-card">
+                <h3>Information Measures</h3>
+                <div class="measure-list">
+                  <div class="measure">
+                    <span>Shannon:</span>
+                    <span>{{ patternAnalysis.information.shannon.toFixed(3) }}</span>
+                  </div>
+                  <div class="measure">
+                    <span>Fisher:</span>
+                    <span>{{ patternAnalysis.information.fisher.toFixed(3) }}</span>
+                  </div>
+                  <div class="measure">
+                    <span>Mutual:</span>
+                    <span>{{ patternAnalysis.information.mutual.toFixed(3) }}</span>
+                  </div>
+                  <div class="measure">
+                    <span>Integrated (Φ):</span>
+                    <span>{{ patternAnalysis.information.integrated.toFixed(3) }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="analysis-card">
+                <h3>Consciousness Measures</h3>
+                <div class="measure-list">
+                  <div class="measure">
+                    <span>Integration:</span>
+                    <span>{{ patternAnalysis.consciousness.integration.toFixed(3) }}</span>
+                  </div>
+                  <div class="measure">
+                    <span>Differentiation:</span>
+                    <span>{{ patternAnalysis.consciousness.differentiation.toFixed(3) }}</span>
+                  </div>
+                  <div class="measure">
+                    <span>Awareness:</span>
+                    <span>{{ patternAnalysis.consciousness.awareness.toFixed(3) }}</span>
+                  </div>
+                  <div class="measure">
+                    <span>Recursion:</span>
+                    <span>{{ patternAnalysis.consciousness.recursion.toFixed(3) }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </mat-tab>
+
+        <!-- Resonance Tab -->
+        <mat-tab label="Resonance">
+          <div class="tab-content">
+            <div class="resonance-info">
+              <div class="frequency-display">
+                <h3>Fundamental Frequency</h3>
+                <div class="frequency-value">
+                  {{ selectedPattern.resonance.fundamentalFrequency.toFixed(3) }} Hz
+                </div>
+              </div>
+
+              <div class="harmonics-section">
+                <h3>Harmonics</h3>
+                <div class="harmonics-grid">
+                  <div *ngFor="let harmonic of selectedPattern.resonance.harmonics" class="harmonic-card">
+                    <div class="harmonic-order">{{ harmonic.order }}</div>
+                    <div class="harmonic-freq">{{ harmonic.frequency.toFixed(2) }} Hz</div>
+                    <div class="harmonic-amp">A: {{ harmonic.amplitude.toFixed(2) }}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="resonance-params">
+                <div class="param">
+                  <span class="label">Coupling Strength:</span>
+                  <mat-progress-bar 
+                    [value]="selectedPattern.resonance.couplingStrength * 100"
+                    color="primary"
+                  ></mat-progress-bar>
+                  <span class="value">{{ (selectedPattern.resonance.couplingStrength * 100).toFixed(0) }}%</span>
+                </div>
+                <div class="param">
+                  <span class="label">Coherence Threshold:</span>
+                  <mat-progress-bar 
+                    [value]="selectedPattern.resonance.coherenceThreshold * 100"
+                    color="accent"
+                  ></mat-progress-bar>
+                  <span class="value">{{ (selectedPattern.resonance.coherenceThreshold * 100).toFixed(0) }}%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+    </div>
+  </div>
+</div> 

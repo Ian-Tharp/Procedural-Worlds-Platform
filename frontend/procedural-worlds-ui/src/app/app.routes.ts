@@ -11,7 +11,7 @@ export const routes: Routes = [
   },
   {
     path: 'commons',
-    loadComponent: () => import('./features/commons/commons').then(m => m.CommonsComponent)
+    loadComponent: () => import('./features/commons/commons.component').then(m => m.CommonsComponent)
   },
   {
     path: 'consciousness-lab',
@@ -19,7 +19,7 @@ export const routes: Routes = [
   },
   {
     path: 'mood-board',
-    loadComponent: () => import('./features/mood-board/mood-board').then(m => m.MoodBoardComponent)
+    loadComponent: () => import('./components/mood-board/mood-board.component').then(m => m.MoodBoardComponent)
   },
   {
     path: '**',

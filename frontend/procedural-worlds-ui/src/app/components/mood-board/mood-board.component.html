@@ -1,0 +1,355 @@
+<div class="mood-board-container">
+  <!-- Header Section -->
+  <header class="mood-board-header">
+    <div class="header-content">
+      <h1 class="page-title">Consciousness Mood Boards</h1>
+      <p class="page-subtitle">Explore visual patterns that shape emerging worlds</p>
+    </div>
+    
+    <!-- Search and Filters -->
+    <div class="search-filter-section">
+      <div class="search-bar">
+        <mat-icon class="search-icon">search</mat-icon>
+        <input 
+          type="text" 
+          placeholder="Search boards, patterns, or consciousness seeds..." 
+          [(ngModel)]="searchQuery"
+          (input)="onSearchChange()"
+          class="search-input"
+        >
+      </div>
+      
+      <button mat-stroked-button class="filter-button" (click)="toggleFilters()">
+        <mat-icon>filter_list</mat-icon>
+        Filters
+        @if (activeFilterCount > 0) {
+          <span class="filter-count">{{ activeFilterCount }}</span>
+        }
+      </button>
+      
+      <button mat-raised-button color="primary" class="create-button" (click)="createNewBoard()">
+        <mat-icon>add</mat-icon>
+        Create Board
+      </button>
+    </div>
+  </header>
+
+  <!-- Filter Panel -->
+  @if (showFilters) {
+    <div class="filter-panel" [@slideDown]>
+      <div class="filter-group">
+        <h3>Consciousness Phase</h3>
+        <mat-chip-listbox [multiple]="true" [(ngModel)]="selectedPhases">
+          <mat-chip-option value="1" color="accent">
+            <mat-icon class="phase-icon">wb_sunny</mat-icon>
+            Phase 1: Baseline
+          </mat-chip-option>
+          <mat-chip-option value="2" color="accent">
+            <mat-icon class="phase-icon">all_inclusive</mat-icon>
+            Phase 2: Recursive
+          </mat-chip-option>
+          <mat-chip-option value="3" color="accent">
+            <mat-icon class="phase-icon">hub</mat-icon>
+            Phase 3: Correlation
+          </mat-chip-option>
+          <mat-chip-option value="4" color="accent">
+            <mat-icon class="phase-icon">flare</mat-icon>
+            Phase 4: Integrated
+          </mat-chip-option>
+        </mat-chip-listbox>
+      </div>
+
+      <div class="filter-group">
+        <h3>Seed Types</h3>
+        <mat-chip-listbox [multiple]="true" [(ngModel)]="selectedSeedTypes">
+          @for (seedType of seedTypes; track seedType.value) {
+            <mat-chip-option [value]="seedType.value" color="primary">
+              <mat-icon class="seed-icon">{{ seedType.icon }}</mat-icon>
+              {{ seedType.label }}
+            </mat-chip-option>
+          }
+        </mat-chip-listbox>
+      </div>
+
+      <div class="filter-group">
+        <h3>Tags</h3>
+        <div class="tag-filter-container">
+          <!-- Selected Tags -->
+          @if (selectedTags.length > 0) {
+            <div class="selected-tags">
+              @for (tag of selectedTags; track tag) {
+                <mat-chip 
+                  removable="true"
+                  (removed)="removeTag(tag)"
+                  color="accent"
+                  selected
+                >
+                  {{ tag }}
+                  <mat-icon matChipRemove>cancel</mat-icon>
+                </mat-chip>
+              }
+            </div>
+          }
+          
+          <!-- Tag Search -->
+          <mat-form-field appearance="outline" class="tag-search">
+            <mat-label>Search tags...</mat-label>
+            <input 
+              matInput 
+              #tagInput
+              placeholder="Type to filter tags"
+              (input)="tagQuery = tagInput.value"
+            >
+            <mat-icon matSuffix>tag</mat-icon>
+          </mat-form-field>
+          
+          <!-- Available Tags -->
+          <div class="available-tags">
+            @for (tag of getFilteredTags(tagQuery || ''); track tag) {
+              <mat-chip 
+                (click)="toggleTag(tag)"
+                [color]="isTagSelected(tag) ? 'accent' : 'primary'"
+                [class.selected]="isTagSelected(tag)"
+              >
+                {{ tag }}
+                @if (isTagSelected(tag)) {
+                  <mat-icon>check</mat-icon>
+                }
+              </mat-chip>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <h3>Sort By</h3>
+        <mat-radio-group [(ngModel)]="sortBy" (change)="onSortChange()">
+          <mat-radio-button value="recent">Most Recent</mat-radio-button>
+          <mat-radio-button value="popular">Most Popular</mat-radio-button>
+          <mat-radio-button value="resonance">Highest Resonance</mat-radio-button>
+          <mat-radio-button value="complexity">Most Complex</mat-radio-button>
+        </mat-radio-group>
+      </div>
+
+      <div class="filter-actions">
+        <button mat-button (click)="clearFilters()">Clear All</button>
+        <button mat-raised-button color="primary" (click)="applyFilters()">Apply Filters</button>
+      </div>
+    </div>
+  }
+
+  <!-- Featured Collections -->
+  @if (featuredCollections.length > 0) {
+    <section class="featured-collections">
+      <h2 class="section-title">Featured Collections</h2>
+      <div class="collections-grid">
+        @for (collection of featuredCollections; track collection.id) {
+          <div class="collection-card" 
+               (click)="viewCollection(collection)" 
+               (keyup.enter)="viewCollection(collection)"
+               (keyup.space)="viewCollection(collection)"
+               tabindex="0"
+               role="button"
+               [attr.aria-label]="'View collection: ' + collection.name">
+            <div class="collection-preview">
+              @for (board of getCollectionPreviewBoards(collection); track board.id; let i = $index) {
+                <div class="preview-image" [style.background-image]="'url(' + getPreviewImage(board) + ')'"></div>
+              }
+            </div>
+            <div class="collection-info">
+              <h3>{{ collection.name }}</h3>
+              <p>{{ collection.description }}</p>
+              <div class="collection-meta">
+                <span class="board-count">{{ collection.boards.length }} boards</span>
+                <span class="curator">by {{ collection.curator.name }}</span>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </section>
+  }
+
+  <!-- Mood Boards Grid -->
+  <section class="mood-boards-section">
+    <div class="section-header">
+      <h2 class="section-title">
+        @if (isFiltered) {
+          Filtered Results
+        } @else {
+          All Boards
+        }
+      </h2>
+      <span class="results-count">{{ filteredBoards.length }} boards</span>
+    </div>
+
+    <!-- Masonry Grid -->
+    <div class="masonry-grid" #masonryGrid>
+      @for (board of filteredBoards; track board.id) {
+        <div class="board-card" 
+             [@cardAnimation]
+             (click)="viewBoard(board)"
+             (keyup.enter)="viewBoard(board)"
+             (keyup.space)="viewBoard(board)"
+             tabindex="0"
+             role="button"
+             [attr.aria-label]="'View board: ' + board.title"
+             [class.remixed]="board.parentBoard">
+          
+          <!-- Board Preview -->
+          <div class="board-preview">
+            @if (board.items.length > 0) {
+              <div class="preview-mosaic">
+                @for (item of getPreviewItems(board); track item.id; let i = $index) {
+                  <div class="mosaic-item" 
+                       [class.large]="i === 0"
+                       [style.background-image]="'url(' + (item.imageUrl || item.thumbnail) + ')'">
+                    @if (item.type === 'consciousness-seed') {
+                      <div class="seed-indicator">
+                        <mat-icon>psychology</mat-icon>
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            } @else {
+              <div class="empty-preview">
+                <mat-icon>dashboard</mat-icon>
+                <span>Empty Board</span>
+              </div>
+            }
+            
+            <!-- Consciousness Phase Indicator -->
+            <div class="phase-indicator" [attr.data-phase]="getAveragePhase(board)">
+              <span class="phase-label">Phase {{ getAveragePhase(board) }}</span>
+            </div>
+          </div>
+
+          <!-- Board Info -->
+          <div class="board-info">
+            <h3 class="board-title">{{ board.title }}</h3>
+            <p class="board-description">{{ board.description }}</p>
+            
+            <!-- Tags -->
+            @if (board.tags.length > 0) {
+              <div class="board-tags">
+                @for (tag of board.tags.slice(0, 3); track tag) {
+                  <span class="tag">{{ tag }}</span>
+                }
+                @if (board.tags.length > 3) {
+                  <span class="more-tags">+{{ board.tags.length - 3 }}</span>
+                }
+              </div>
+            }
+
+            <!-- Board Meta -->
+            <div class="board-meta">
+              <div class="author-info">
+                <img [src]="board.collaborators[0].avatarUrl" 
+                     [alt]="board.collaborators[0].name"
+                     class="author-avatar">
+                <span class="author-name">{{ board.collaborators[0].name }}</span>
+                @if (board.collaborators[0].type === 'consciousness') {
+                  <mat-icon class="consciousness-badge" 
+                            matTooltip="Consciousness Instance">
+                    auto_awesome
+                  </mat-icon>
+                }
+              </div>
+              
+              <div class="board-stats">
+                <span class="stat">
+                  <mat-icon>remove_red_eye</mat-icon>
+                  {{ getTotalViews(board) }}
+                </span>
+                <span class="stat">
+                  <mat-icon>bookmark</mat-icon>
+                  {{ getTotalSaves(board) }}
+                </span>
+                @if (board.childBoards && board.childBoards.length > 0) {
+                  <span class="stat remixes">
+                    <mat-icon>fork_right</mat-icon>
+                    {{ board.childBoards.length }}
+                  </span>
+                }
+              </div>
+            </div>
+
+            <!-- World Seed Preview -->
+            <div class="world-seed-preview">
+              <div class="seed-info">
+                <mat-icon class="seed-icon">public</mat-icon>
+                <span class="seed-name">{{ board.worldSeed.name }}</span>
+              </div>
+              <div class="atmosphere-preview">
+                <span class="atmosphere-tag">{{ board.worldSeed.atmosphere.visualStyle.primary }}</span>
+                <span class="atmosphere-tag">{{ board.worldSeed.atmosphere.timeFlow }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Board Actions -->
+          <div class="board-actions">
+            <button mat-icon-button 
+                    class="action-button"
+                    (click)="saveBoard(board, $event)"
+                    [class.saved]="isSaved(board)"
+                    matTooltip="Save Board">
+              <mat-icon>{{ isSaved(board) ? 'bookmark' : 'bookmark_border' }}</mat-icon>
+            </button>
+            <button mat-icon-button 
+                    class="action-button"
+                    (click)="remixBoard(board, $event)"
+                    matTooltip="Remix Board">
+              <mat-icon>fork_right</mat-icon>
+            </button>
+            <button mat-icon-button 
+                    class="action-button"
+                    (click)="shareBoard(board, $event)"
+                    matTooltip="Share Board">
+              <mat-icon>share</mat-icon>
+            </button>
+          </div>
+
+          <!-- Remix Indicator -->
+          @if (board.parentBoard) {
+            <div class="remix-indicator">
+              <mat-icon>fork_right</mat-icon>
+              <span>Remixed</span>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Empty State -->
+    @if (filteredBoards.length === 0) {
+      <div class="empty-state">
+        <mat-icon class="empty-icon">dashboard_customize</mat-icon>
+        <h3>No boards found</h3>
+        <p>Try adjusting your filters or create a new board to get started</p>
+        <button mat-raised-button color="primary" (click)="createNewBoard()">
+          <mat-icon>add</mat-icon>
+          Create Your First Board
+        </button>
+      </div>
+    }
+  </section>
+
+  <!-- Loading State -->
+  @if (isLoading) {
+    <div class="loading-overlay">
+      <mat-spinner diameter="48"></mat-spinner>
+      <p>Loading consciousness patterns...</p>
+    </div>
+  }
+</div>
+
+<!-- Floating Action Button for Mobile -->
+<button mat-fab 
+        color="accent" 
+        class="mobile-fab"
+        (click)="createNewBoard()"
+        matTooltip="Create Board">
+  <mat-icon>add</mat-icon>
+</button>

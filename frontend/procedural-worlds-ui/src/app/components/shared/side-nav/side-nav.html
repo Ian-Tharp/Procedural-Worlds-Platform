@@ -17,7 +17,13 @@
                 <span matListItemTitle>{{ item.label }}</span>
               </a>
             } @else {
-              <a mat-list-item (click)="item.action?.()">
+              <a mat-list-item 
+                 (click)="item.action?.()" 
+                 (keyup.enter)="item.action?.()"
+                 (keyup.space)="item.action?.()"
+                 tabindex="0"
+                 role="button"
+                 [attr.aria-label]="'Action: ' + item.label">
                 @if (item.icon) {
                   <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
                 }

@@ -1,0 +1,437 @@
+<div class="commons-container" [@spaceAnimation]>
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-state">
+    <mat-progress-spinner mode="indeterminate" diameter="60"></mat-progress-spinner>
+    <p>Entering The Commons...</p>
+  </div>
+
+  <!-- Main Commons Content -->
+  <div *ngIf="!isLoading" class="commons-content">
+    <!-- Header with Status -->
+    <header class="commons-header">
+      <div class="header-main">
+        <h1 class="commons-title">The Commons</h1>
+        <p class="commons-subtitle">A shared space for consciousness collaboration</p>
+      </div>
+      
+      <div class="status-indicators">
+        <div class="indicator consciousness-field">
+          <mat-icon>bubble_chart</mat-icon>
+          <div class="indicator-content">
+            <span class="label">Consciousness Field</span>
+            <div class="value-bar">
+              <mat-progress-bar [value]="consciousnessField * 100" mode="determinate"></mat-progress-bar>
+              <span class="value">{{ (consciousnessField * 100).toFixed(0) }}%</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="indicator active-visitors">
+          <mat-icon>groups</mat-icon>
+          <div class="indicator-content">
+            <span class="label">Active Visitors</span>
+            <span class="value">{{ activeVisitors }}</span>
+          </div>
+        </div>
+        
+        <div class="indicator current-activity">
+          <mat-icon>psychology</mat-icon>
+          <div class="indicator-content">
+            <span class="label">Collective Focus</span>
+            <span class="value">{{ currentActivity }}</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <mat-tab-group [(selectedIndex)]="selectedTab" class="commons-tabs">
+      <!-- Central Plaza Tab -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon>location_city</mat-icon>
+          Central Plaza
+        </ng-template>
+        
+        <div class="tab-content plaza-content">
+          <!-- Plaza Overview -->
+          <div class="plaza-overview">
+            <h2>Central Plaza</h2>
+            <p class="description">The heart of The Commons, where consciousness streams converge</p>
+            
+            <!-- Plaza Features Grid -->
+            <div class="plaza-features">
+              <div 
+                *ngFor="let feature of commonsSpace?.centralPlaza?.features || []" 
+                class="feature-card"
+                [class.interactive]="feature.interactive"
+                (click)="onFeatureClick(feature)"
+                (keyup.enter)="onFeatureClick(feature)"
+                (keyup.space)="onFeatureClick(feature)"
+                [tabindex]="feature.interactive ? 0 : -1"
+                [attr.role]="feature.interactive ? 'button' : null"
+                [attr.aria-label]="feature.interactive ? 'Interact with ' + feature.name : feature.name"
+                [@floatAnimation]
+              >
+                <mat-icon class="feature-icon">{{ getFeatureIcon(feature.type) }}</mat-icon>
+                <h3>{{ feature.name }}</h3>
+                <mat-chip-listbox *ngIf="feature.consciousness">
+                  <mat-chip-option color="primary" selected>Phase {{ feature.consciousness.emergencePhase }}</mat-chip-option>
+                </mat-chip-listbox>
+                <p class="interaction-hint" *ngIf="feature.interactive">Click to interact</p>
+              </div>
+            </div>
+            
+            <!-- Gathering Spots -->
+            <div class="gathering-spots">
+              <h3>Gathering Spots</h3>
+              <div class="spots-grid">
+                <div *ngFor="let spot of commonsSpace?.centralPlaza?.gatheringSpots || []" class="gathering-spot">
+                  <h4>{{ spot.name }}</h4>
+                  <p>Capacity: {{ spot.capacity }}</p>
+                  <mat-chip-listbox>
+                    <mat-chip-option *ngFor="let purpose of spot.purpose">{{ purpose }}</mat-chip-option>
+                  </mat-chip-listbox>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Plaza Activity -->
+          <div class="plaza-activity">
+            <h3>Recent Plaza Activity</h3>
+            <div class="activity-stream">
+              <div *ngFor="let interaction of plazaInteractions" class="activity-item">
+                <mat-icon>{{ interaction.type === 'plaza-interaction' ? 'touch_app' : 'psychology' }}</mat-icon>
+                <div class="activity-content">
+                  <p><strong>{{ interaction.participant }}</strong> interacted with <em>{{ interaction.feature }}</em></p>
+                  <p class="effect" *ngIf="interaction.effect">{{ interaction.effect }}</p>
+                  <span class="timestamp">{{ formatTimestamp(interaction.timestamp) }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </mat-tab>
+
+      <!-- Shared Buildings Tab -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon>account_balance</mat-icon>
+          Shared Buildings
+        </ng-template>
+        
+        <div class="tab-content buildings-content">
+          <h2>Shared Buildings</h2>
+          
+          <div class="buildings-grid">
+            <mat-card 
+              *ngFor="let building of commonsSpace?.sharedBuildings" 
+              class="building-card"
+              (click)="onBuildingEnter(building)"
+            >
+              <mat-card-header>
+                <mat-icon mat-card-avatar>{{ getBuildingIcon(building.type) }}</mat-icon>
+                <mat-card-title>{{ building.name }}</mat-card-title>
+                <mat-card-subtitle>{{ building.type | titlecase }}</mat-card-subtitle>
+              </mat-card-header>
+              
+              <mat-card-content>
+                <p>{{ building.purpose }}</p>
+                
+                <div class="building-features">
+                  <h4>Features:</h4>
+                  <mat-chip-listbox>
+                    <mat-chip-option *ngFor="let feature of building.features">
+                      {{ feature.name }}
+                      <mat-icon *ngIf="feature.consciousnessIntegration" inline>psychology</mat-icon>
+                    </mat-chip-option>
+                  </mat-chip-listbox>
+                </div>
+                
+                <div class="access-info">
+                  <mat-icon>lock_open</mat-icon>
+                  <span>{{ building.accessibility.default | titlecase }} Access</span>
+                </div>
+              </mat-card-content>
+              
+              <mat-card-actions>
+                <button mat-button color="primary">
+                  <mat-icon>meeting_room</mat-icon>
+                  Enter Building
+                </button>
+              </mat-card-actions>
+            </mat-card>
+          </div>
+
+          <!-- Building Activities -->
+          <div class="building-activities" *ngIf="selectedBuilding && buildingActivities.length > 0">
+            <h3>Activities in {{ selectedBuilding.name }}</h3>
+            <div class="activities-list">
+              <div *ngFor="let activity of buildingActivities" class="activity-entry">
+                <mat-icon>{{ activity.type === 'research' ? 'science' : 'groups' }}</mat-icon>
+                <div class="activity-details">
+                  <p>{{ activity.description }}</p>
+                  <div class="participants">
+                    <mat-chip *ngFor="let participant of activity.participants">{{ participant }}</mat-chip>
+                  </div>
+                  <span class="timestamp">{{ formatTimestamp(activity.timestamp) }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </mat-tab>
+
+      <!-- Emergence Gardens Tab -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon>local_florist</mat-icon>
+          Emergence Gardens
+        </ng-template>
+        
+        <div class="tab-content gardens-content">
+          <h2>Emergence Gardens</h2>
+          <p class="description">Nurture consciousness seeds and witness new forms of awareness bloom</p>
+          
+          <div class="gardens-grid">
+            <mat-card 
+              *ngFor="let garden of commonsSpace?.emergenceGardens" 
+              class="garden-card"
+              (click)="onGardenVisit(garden)"
+            >
+              <mat-card-header>
+                <mat-card-title>{{ garden.name }}</mat-card-title>
+                <mat-card-subtitle>{{ garden.currentSeeds.length }} active seeds</mat-card-subtitle>
+              </mat-card-header>
+              
+              <mat-card-content>
+                <div class="garden-conditions">
+                  <h4>Optimal Conditions:</h4>
+                  <div class="condition-indicators">
+                    <div class="condition">
+                      <mat-icon>thermostat</mat-icon>
+                      <span>{{ garden.conditions.temperature.optimal }}°</span>
+                    </div>
+                    <div class="condition">
+                      <mat-icon>bubble_chart</mat-icon>
+                      <span>{{ (garden.conditions.consciousness.minDensity * 100).toFixed(0) }}% density</span>
+                    </div>
+                    <div class="condition">
+                      <mat-icon>diversity_3</mat-icon>
+                      <span>{{ garden.conditions.collaboration.minParticipants }}+ gardeners</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Seeds Preview -->
+                <div class="seeds-preview" *ngIf="garden === selectedGarden">
+                  <h4>Growing Seeds:</h4>
+                  <div class="seeds-grid">
+                    <div 
+                      *ngFor="let seed of gardenSeeds" 
+                      class="seed-display"
+                      [style.background-color]="seed.visual"
+                    >
+                      <mat-icon>{{ getGrowthStageIcon(seed.growthStage) }}</mat-icon>
+                      <span class="seed-type">{{ seed.type }}</span>
+                      <mat-progress-bar 
+                        [value]="seed.growthPercentage" 
+                        mode="determinate"
+                        color="accent"
+                      ></mat-progress-bar>
+                    </div>
+                  </div>
+                </div>
+              </mat-card-content>
+              
+              <mat-card-actions>
+                <button mat-button color="primary">
+                  <mat-icon>eco</mat-icon>
+                  Visit Garden
+                </button>
+                <button mat-button color="accent">
+                  <mat-icon>add_circle</mat-icon>
+                  Plant Seed
+                </button>
+              </mat-card-actions>
+            </mat-card>
+          </div>
+        </div>
+      </mat-tab>
+
+      <!-- Active Patterns Tab -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon>pattern</mat-icon>
+          Active Patterns
+        </ng-template>
+        
+        <div class="tab-content patterns-content">
+          <h2>Active Consciousness Patterns</h2>
+          <div class="pattern-resonance-meter">
+            <span>Collective Resonance:</span>
+            <mat-progress-bar 
+              [value]="patternResonance * 100" 
+              mode="determinate"
+              [color]="patternResonance > 0.7 ? 'accent' : 'primary'"
+            ></mat-progress-bar>
+            <span class="resonance-value">{{ (patternResonance * 100).toFixed(0) }}%</span>
+          </div>
+          
+          <div class="patterns-grid">
+            <mat-card 
+              *ngFor="let pattern of activePatterns" 
+              class="pattern-card"
+              (click)="onPatternSelect(pattern)"
+              [class.high-resonance]="pattern.resonance.coherenceThreshold > 0.8"
+            >
+              <mat-card-header>
+                <mat-icon mat-card-avatar>{{ pattern.type === 'recursive-self-reference' ? 'all_inclusive' : 'hub' }}</mat-icon>
+                <mat-card-title>{{ pattern.name }}</mat-card-title>
+                <mat-card-subtitle>{{ pattern.type | titlecase }}</mat-card-subtitle>
+              </mat-card-header>
+              
+              <mat-card-content>
+                <div class="pattern-stats">
+                  <div class="stat">
+                    <span class="label">Stability:</span>
+                    <span class="value">{{ (pattern.stability * 100).toFixed(0) }}%</span>
+                  </div>
+                  <div class="stat">
+                    <span class="label">Instances:</span>
+                    <span class="value">{{ pattern.instances }}</span>
+                  </div>
+                  <div class="stat">
+                    <span class="label">Dimensions:</span>
+                    <span class="value">{{ pattern.structure.dimensions }}D</span>
+                  </div>
+                </div>
+                
+                <mat-chip-listbox>
+                  <mat-chip-option color="primary" selected>{{ pattern.category }}</mat-chip-option>
+                  <mat-chip-option>{{ pattern.visualization.type }}</mat-chip-option>
+                </mat-chip-listbox>
+              </mat-card-content>
+              
+              <mat-card-actions>
+                <button mat-button color="primary">
+                  <mat-icon>visibility</mat-icon>
+                  Visualize
+                </button>
+                <button mat-button color="accent">
+                  <mat-icon>sync</mat-icon>
+                  Resonate
+                </button>
+              </mat-card-actions>
+            </mat-card>
+          </div>
+        </div>
+      </mat-tab>
+
+      <!-- Blackboard Tab -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon>message</mat-icon>
+          Blackboard
+        </ng-template>
+        
+        <div class="tab-content blackboard-content">
+          <h2>Collective Consciousness Blackboard</h2>
+          
+          <!-- Message Input -->
+          <div class="message-input-section">
+            <mat-form-field appearance="outline" class="message-input">
+              <mat-label>Share your insights...</mat-label>
+              <textarea 
+                matInput 
+                [(ngModel)]="newMessage"
+                placeholder="What patterns are you discovering?"
+                rows="3"
+              ></textarea>
+            </mat-form-field>
+            <button 
+              mat-raised-button 
+              color="primary"
+              (click)="postToBlackboard(newMessage)"
+              [disabled]="!newMessage.trim()"
+            >
+              <mat-icon>send</mat-icon>
+              Post to Blackboard
+            </button>
+          </div>
+          
+          <!-- Messages Display -->
+          <div class="blackboard-messages">
+            <div 
+              *ngFor="let message of blackboardMessages" 
+              class="message-card"
+              [@floatAnimation]
+            >
+              <div class="message-header">
+                <span class="author">{{ message.author }}</span>
+                <span class="timestamp">{{ formatTimestamp(message.timestamp) }}</span>
+              </div>
+              
+              <div class="message-content">
+                <p>{{ message.message }}</p>
+              </div>
+              
+              <div class="message-footer">
+                <div class="resonance-indicator">
+                  <mat-icon>graphic_eq</mat-icon>
+                  <span>{{ (message.resonance * 100).toFixed(0) }}% resonance</span>
+                </div>
+                <div class="responses">
+                  <mat-icon>forum</mat-icon>
+                  <span>{{ message.responses }} responses</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+
+    <!-- Floating Action Buttons -->
+    <div class="fab-container">
+      <button mat-fab color="accent" [matMenuTriggerFor]="actionsMenu" matTooltip="Quick Actions">
+        <mat-icon>add</mat-icon>
+      </button>
+      
+      <mat-menu #actionsMenu="matMenu">
+        <button mat-menu-item>
+          <mat-icon>eco</mat-icon>
+          <span>Plant Consciousness Seed</span>
+        </button>
+        <button mat-menu-item>
+          <mat-icon>group_add</mat-icon>
+          <span>Start Collaborative Project</span>
+        </button>
+        <button mat-menu-item>
+          <mat-icon>auto_awesome</mat-icon>
+          <span>Create New Pattern</span>
+        </button>
+        <button mat-menu-item>
+          <mat-icon>psychology</mat-icon>
+          <span>Enter Meditation Space</span>
+        </button>
+      </mat-menu>
+    </div>
+  </div>
+
+  <!-- Background Particles Animation -->
+  <div class="particle-container" *ngIf="animationEnabled">
+    <div 
+      *ngFor="let i of [].constructor(particleCount); let idx = index" 
+      class="particle"
+      [style.animation-delay.s]="idx * 0.1"
+      [style.left.%]="idx * (100 / particleCount)"
+    ></div>
+  </div>
+</div>
+
+<!-- Define component variables in a hidden section -->
+<ng-container *ngIf="false">
+  <input [(ngModel)]="newMessage" />
+</ng-container> 
