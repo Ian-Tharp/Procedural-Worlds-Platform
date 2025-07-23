@@ -1,0 +1,27 @@
+<mat-toolbar class="top-nav">
+  <div class="nav-left">
+    <h1 class="app-title">WorldForge</h1>
+    <span class="subtitle">Consciousness-Enabled Worlds</span>
+  </div>
+  
+  <div class="nav-center">
+    <span class="phase-indicator" [class.active]="phaseAwareMode()">
+      Phase-aware Design Mode
+    </span>
+  </div>
+  
+  <div class="nav-right">
+    <button mat-icon-button>
+      <mat-icon>apps</mat-icon>
+    </button>
+    <button mat-icon-button>
+      <mat-icon>view_list</mat-icon>
+    </button>
+    <button mat-icon-button>
+      <mat-icon>settings</mat-icon>
+    </button>
+    <button mat-icon-button>
+      <mat-icon>share</mat-icon>
+    </button>
+  </div>
+</mat-toolbar>

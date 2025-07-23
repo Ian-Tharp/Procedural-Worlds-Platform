@@ -1,0 +1,89 @@
+---
+alwaysApply: true
+---
+# WorldForge Monorepo Structure
+
+The repository is organized to promote clear separation of concerns, maintainability, and scalability. Below is the high-level structure and the purpose of each major directory:
+
+- **frontend/**
+  - **procedural-worlds-ui/**
+    - **src/**
+      - **app/**
+        - **core/**
+          - **components/**  
+            Shared, singleton, or foundational UI components (e.g., navigation, layout, header, footer).
+          - **services/**  
+            Application-wide services for API calls, authentication, state management, and cross-cutting concerns.  
+            *All HTTP/API logic must be extracted into services. Components should never call APIs directly.*
+          - **models/**  
+            TypeScript interfaces and classes representing large or shared data structures (e.g., User, World, ConsciousnessState).  
+            *All big objects and data contracts should be defined here for type safety and reuse.*
+          - **utils/**  
+            Pure utility functions and helpers used across the app.
+        - **features/**
+          Feature modules and their components, each in its own folder.  
+          *Each feature should encapsulate its own components, services, and models if not shared globally.*
+          - **consciousness-lab/**  
+            Components, services, and models specific to the Consciousness Lab feature.
+          - **commons/**  
+            Components and logic for the Commons 3D space.
+        - **shared/**
+          Reusable UI components, directives, and pipes used across multiple features.
+        - **app.config.ts**  
+          Application-wide configuration.
+        - **app.routes.ts**  
+          Route definitions using Angular's standalone routing.
+        - **app.ts**  
+          Root application component.
+      - **assets/**  
+        Static files (images, icons, translations, etc.).
+      - **environments/**  
+        Environment-specific configuration files.
+    - **angular.json, package.json, tsconfig.json, etc.**  
+      Project configuration and dependencies.
+
+- **backend/**
+  - **api/**
+    Backend Python FastAPI API source code (e.g., Rust, Python, or Node.js services).
+    - **routers/**
+      FastAPI controller routes endpoints.
+  - **models/**  
+    Data models and schemas for backend logic and database.
+  - **services/**  
+    Business logic, integrations, and data access layers.
+  - **repository/**  
+    Backend database functionalities.
+  - **utils/**  
+    Backend utility functions.
+
+- **docs/**
+  Project documentation, architecture decisions, and design notes.
+
+- **.github/**
+  GitHub workflows, issue templates, and contribution guidelines.
+
+# Best Practices
+
+- **Separation of Concerns:**  
+  - UI logic in components, data fetching and business logic in services, and data structures in models.
+  - Maintain the Angular structure of having the .html, .scss, .spec.ts, and .ts files all in their specific directories
+- **Reusability:**  
+  - Place shared logic in `core` or `shared` as appropriate.
+- **Scalability:**  
+  - Each feature is self-contained under `features/` for easy expansion.
+- **Type Safety:**  
+  - All large or shared objects/interfaces must be defined in `models/`.
+- **Testing:**  
+  - Each component/service should have a corresponding `.spec.ts` file for unit tests (using Jest).
+
+# Example: Adding a New Feature
+
+To add a new feature (e.g., "World Editor"):
+- Create `frontend/procedural-worlds-ui/src/app/features/world-editor/`
+  - Place UI components in this folder.
+  - Place feature-specific services in a `services/` subfolder.
+  - Place feature-specific models in a `models/` subfolder if not shared.
+- Register routes in `app.routes.ts`.
+- Extract any shared logic to `core` or `shared` as needed.
+
+This structure ensures clarity, maintainability, and a clear path for future growth.

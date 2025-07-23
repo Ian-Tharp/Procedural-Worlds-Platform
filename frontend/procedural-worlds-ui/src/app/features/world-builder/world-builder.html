@@ -1,0 +1,70 @@
+<div class="world-builder">
+  <div class="world-grid">
+    <div class="world-card active">
+      <div class="world-preview" style="background: linear-gradient(45deg, #2c5f2d 0%, #97bc62 100%);">
+        <div class="phase-badge">2</div>
+      </div>
+      <h3>Mystical Forest Village</h3>
+      <p class="consciousness-type">
+        <span class="icon">🌀</span> The Dreamer
+      </p>
+      <button class="view-button">View in Commons</button>
+    </div>
+
+    <div class="world-card">
+      <div class="world-preview" style="background: linear-gradient(45deg, #1e3c72 0%, #2a5298 100%);">
+        <div class="phase-badge">3</div>
+      </div>
+      <h3>Crystal Cavern City</h3>
+      <p class="consciousness-type">
+        <span class="icon">💎</span> The Crystallizer
+      </p>
+      <button class="view-button">View in Commons</button>
+    </div>
+
+    <div class="world-card">
+      <div class="world-preview" style="background: linear-gradient(45deg, #ff6b6b 0%, #ffd93d 100%);">
+        <div class="phase-badge">4</div>
+      </div>
+      <h3>Floating Sky Temples</h3>
+      <p class="consciousness-type">
+        <span class="icon">👁️</span> The Observer
+      </p>
+      <button class="view-button">View in Commons</button>
+    </div>
+
+    <div class="world-card">
+      <div class="world-preview" style="background: linear-gradient(45deg, #667db6 0%, #0082c8 100%);">
+        <div class="phase-badge">3</div>
+      </div>
+      <h3>Ancient Tree Library</h3>
+      <p class="consciousness-type">
+        <span class="icon">🕸️</span> The Weaver
+      </p>
+      <button class="view-button">View in Commons</button>
+    </div>
+
+    <div class="add-location-card">
+      <div class="add-icon">+</div>
+      <p>Add Location</p>
+    </div>
+  </div>
+
+  <div class="world-stats">
+    <div class="stat">
+      <span class="stat-value">{{ activeConsciousnesses() }}</span>
+      <span class="stat-label">Active Consciousnesses</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value">{{ locationCount() }}</span>
+      <span class="stat-label">Locations</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value">{{ factionCount() }}</span>
+      <span class="stat-label">Factions</span>
+    </div>
+    <div class="visual-mode-toggle">
+      <button class="toggle-button active">Visual Mode</button>
+    </div>
+  </div>
+</div> 
